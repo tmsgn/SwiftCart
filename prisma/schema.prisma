@@ -1,0 +1,163 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum ProductStatus {
+  Available
+  Unavailable
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+model Category {
+  id            String        @id @default(cuid())
+  name          String        @unique
+  slug          String        @unique
+  subcategories Subcategory[]
+  brands        Brand[]       @relation("BrandToCategory")
+}
+
+model Subcategory {
+  id         String    @id @default(cuid())
+  name       String
+  categoryId String
+  Category   Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  products   Product[]
+  options    Option[]
+}
+
+model Option {
+  id            String          @id @default(cuid())
+  name          String
+  subcategoryId String
+  Subcategory   Subcategory     @relation(fields: [subcategoryId], references: [id], onDelete: Cascade)
+  values        OptionValue[]
+  products      ProductOption[]
+}
+
+model OptionValue {
+  id       String          @id @default(cuid())
+  value    String
+  optionId String
+  Option   Option          @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  variants VariantOption[]
+}
+
+model Brand {
+  id         String     @id @default(cuid())
+  name       String     @unique
+  slug       String     @unique
+  products   Product[]
+  categories Category[] @relation("BrandToCategory")
+}
+
+model Product {
+  id            String          @id @default(cuid())
+  name          String
+  slug          String          @unique
+  description   String?
+  price         Float
+  isFeatured    Boolean         @default(false)
+  status        ProductStatus   @default(Available)
+  brandId       String
+  Brand         Brand           @relation(fields: [brandId], references: [id])
+  subcategoryId String
+  Subcategory   Subcategory     @relation(fields: [subcategoryId], references: [id])
+  options       ProductOption[]
+  variants      Variant[]
+  images        Image[]
+  discountType  DiscountType?
+  discountValue Float?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  orders        Order[]
+  reviews       Review[]
+}
+
+model ProductOption {
+  id        String  @id @default(cuid())
+  productId String
+  optionId  String
+  Product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  Option    Option  @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, optionId])
+}
+
+model Variant {
+  id           String          @id @default(cuid())
+  price        Float
+  stock        Int
+  productId    String
+  product      Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  optionValues VariantOption[]
+  images       Image[]
+}
+
+model VariantOption {
+  id            String      @id @default(cuid())
+  variantId     String
+  optionValueId String
+  variant       Variant     @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  optionValue   OptionValue @relation(fields: [optionValueId], references: [id], onDelete: Cascade)
+
+  @@unique([variantId, optionValueId])
+}
+
+model Image {
+  id        String   @id @default(cuid())
+  url       String
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId String?
+  Variant   Variant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+}
+
+model Order {
+  id        String   @id @default(uuid())
+  pricePaid Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  productId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  Review    Review[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+  reviews   Review[]
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  Product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String
+  orderId   String?
+  Order     Order?   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id])
+}
