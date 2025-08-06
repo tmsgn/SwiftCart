@@ -9,8 +9,11 @@ import Link from "next/link";
 const Products = async () => {
   const products = await prismadb.product.findMany({
     include: {
-      variants: true,
-      orders: true,
+      variants: {
+        include: {
+          orderItems: true,
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
@@ -20,10 +23,13 @@ const Products = async () => {
   const formattedProducts = products.map((product) => ({
     id: product.id,
     name: product.name,
-    status: product.status,
-    price: product.price,
+    isAvailable: product.isAvailable,
+    price: product.variants[0]?.price ?? 0,
     stock: product.variants.reduce((sum, variant) => sum + variant.stock, 0),
-    orders: product.orders.length,
+    orders: product.variants.reduce(
+      (sum, variant) => sum + (variant.orderItems?.length ?? 0),
+      0
+    ),
     createdAt: product.createdAt.toISOString(),
   }));
 

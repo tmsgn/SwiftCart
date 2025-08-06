@@ -20,12 +20,12 @@ import Link from "next/link";
 
 interface CellActionsProps {
   productId: string;
-  status: "Available" | "Unavailable";
+  isAvailable: boolean;
 }
 
 export const CellActions: React.FC<CellActionsProps> = ({
   productId,
-  status,
+  isAvailable,
 }) => {
   const [isPending, startTransition] = useTransition();
   const [showAlert, setShowAlert] = useState(false);
@@ -54,7 +54,7 @@ export const CellActions: React.FC<CellActionsProps> = ({
       if (res?.error) {
         toast.error(res.error);
       } else {
-        toast.success(`Product status set to ${res.status}.`);
+        toast.success(`Product status set to ${res.isAvailable}.`);
         router.refresh();
       }
     });

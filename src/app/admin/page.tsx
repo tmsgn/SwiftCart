@@ -23,7 +23,16 @@ const Dashboard = async () => {
     prismadb.product.findMany(),
     prismadb.order.findMany({
       orderBy: { createdAt: "desc" },
-      include: { product: true, user: true },
+      include: {
+        buyer: true,
+        orderItems: {
+          include: {
+            productVariant: {
+              include: { product: true },
+            },
+          },
+        },
+      },
     }),
     prismadb.user.findMany(),
   ]);
@@ -126,9 +135,18 @@ const Dashboard = async () => {
                       {order.createdAt.toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      {order.user?.name || order.user?.email || "-"}
+                      {order.buyer?.name || order.buyer?.email || "-"}
                     </TableCell>
-                    <TableCell>{order.product?.name || "-"}</TableCell>
+                    <TableCell>
+                      {order.orderItems && order.orderItems.length > 0
+                        ? order.orderItems
+                            .map(
+                              (item: any) =>
+                                item.productVariant?.product?.name || "-"
+                            )
+                            .join(", ")
+                        : "-"}
+                    </TableCell>
                     <TableCell>${order.pricePaid.toLocaleString()}</TableCell>
                   </TableRow>
                 ))}

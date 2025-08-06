@@ -14,16 +14,18 @@ export async function toggleProductStatus(productId: string) {
   try {
     const product = await prismadb.product.findUnique({
       where: { id: productId },
+      select: { isAvailable: true },
     });
-    if (!product) return { error: "Product not found." };
-    const newStatus =
-      product.status === "Available" ? "Unavailable" : "Available";
-    await prismadb.product.update({
+    if (!product) {
+      return { error: "Product not found." };
+    }
+
+    const updated = await prismadb.product.update({
       where: { id: productId },
-      data: { status: newStatus },
+      data: { isAvailable: !product.isAvailable },
     });
-    return { success: true, status: newStatus };
+    return { success: true, isAvailable: updated.isAvailable };
   } catch (error: any) {
-    return { error: error.message || "Failed to toggle status." };
+    return { error: error.message || "Failed to toggle product status." };
   }
 }

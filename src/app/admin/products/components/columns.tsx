@@ -8,7 +8,7 @@ import { CellActions } from "./cell-actions";
 export type Product = {
   id: string;
   name: string;
-  status: "Available" | "Unavailable";
+  isAvailable: boolean
   stock: number;
   price: number;
   orders: number;
@@ -24,9 +24,9 @@ export const columns: ColumnDef<Product>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.original.status;
+      const isAvailable = row.original.isAvailable;
       return (
-        <Badge variant={status === "Available" ? "default" : "destructive"}>
+        <Badge variant={isAvailable ? "default" : "destructive"}>
           {status}
         </Badge>
       );
@@ -55,7 +55,7 @@ export const columns: ColumnDef<Product>[] = [
     id: "actions",
     header: "Actions",
     cell: ({ row }) => (
-      <CellActions productId={row.original.id} status={row.original.status} />
+      <CellActions productId={row.original.id} isAvailable={row.original.isAvailable} />
     ),
   },
 ];

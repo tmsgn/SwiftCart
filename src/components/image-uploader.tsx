@@ -1,222 +1,133 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { ImagePlus, X } from "lucide-react";
 import Image from "next/image";
+import { useState, useRef } from "react";
 import { toast } from "sonner";
-import {
-  UploadIcon,
-  X as XIcon,
-  AlertCircle as AlertCircleIcon,
-  ImageIcon,
-  Trash2Icon,
-} from "lucide-react";
-import clsx from "clsx";
+
 import { Button } from "@/components/ui/button";
 
 interface ImageUploadProps {
-  value: string[];
-  onChange: (url: string) => void;
-  onRemove: (url: string) => void;
   disabled?: boolean;
+  onChange: (value: string) => void;
+  onRemove: (value: string) => void;
+  value: string[];
 }
 
-const MAX_FILES = 6;
-const MAX_SIZE_MB = 5;
-const MAX_SIZE = MAX_SIZE_MB * 1024 * 1024;
-
-export const ImageUpload: React.FC<ImageUploadProps> = ({
-  value,
+const ImageUpload: React.FC<ImageUploadProps> = ({
+  disabled,
   onChange,
   onRemove,
-  disabled = false,
+  value,
 }) => {
+  const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
+  const uploadTargetIndex = useRef<number | null>(null);
 
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    uploadFiles(e.target.files);
-  };
-
-  const handleClick = () => {
-    if (!disabled && !uploading && value.length < MAX_FILES) {
-      inputRef.current?.click();
-    }
-  };
-
-  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-    if (disabled || uploading || value.length >= MAX_FILES) return;
-    await uploadFiles(e.dataTransfer.files);
-  };
-
-  const uploadFiles = async (files: FileList | null) => {
-    setErrors([]);
-    if (!files) return;
-
-    if (value.length + files.length > MAX_FILES) {
-      toast.error(`You can only upload up to ${MAX_FILES} images.`);
-      return;
-    }
-
-    setUploading(true);
-    const newErrors: string[] = [];
-
-    for (const file of Array.from(files)) {
-      if (file.size > MAX_SIZE) {
-        newErrors.push(`${file.name} exceeds ${MAX_SIZE_MB}MB`);
-        continue;
-      }
-
+  const handleUpload = async (file: File) => {
+    try {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("upload_preset", "my_preset");
 
-      try {
-        const res = await fetch(
-          "https://api.cloudinary.com/v1_1/dqbfjahy6/image/upload",
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-        const data = await res.json();
-        if (data.secure_url) {
-          onChange(data.secure_url);
-        } else {
-          newErrors.push(`${file.name} upload failed.`);
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/dqbfjahy6/image/upload`,
+        {
+          method: "POST",
+          body: formData,
         }
-      } catch {
-        newErrors.push(`${file.name} upload failed.`);
-      }
-    }
+      );
 
-    if (newErrors.length > 0) setErrors(newErrors);
-    setUploading(false);
+      const data = await res.json();
+      if (data.secure_url) {
+        onChange(data.secure_url);
+        toast.success("Image uploaded successfully.");
+      } else {
+        throw new Error("Upload failed");
+      }
+    } catch (error) {
+      toast.error("Something went wrong during upload.");
+    } finally {
+      setLoadingIndex(null);
+    }
   };
 
-  const handleRemoveAll = () => {
-    value.forEach(onRemove);
+  const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      if (uploadTargetIndex.current !== null) {
+        setLoadingIndex(uploadTargetIndex.current);
+        handleUpload(e.target.files[0]);
+      }
+    }
+    e.target.value = "";
+  };
+
+  const handlePlaceholderClick = (index: number) => {
+    if (disabled || loadingIndex !== null) return;
+    uploadTargetIndex.current = index;
+    inputRef.current?.click();
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setIsDragging(true);
-        }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={handleDrop}
-        data-dragging={isDragging || undefined}
-        data-files={value.length > 0 || undefined}
-        className={clsx(
-          "border-input data-[dragging=true]:bg-accent/50 has-[input:focus]:border-ring has-[input:focus]:ring-ring/50 relative flex min-h-52 flex-col items-center overflow-hidden rounded-xl border border-dashed p-4 transition-colors not-data-[files]:justify-center has-[input:focus]:ring-[3px]",
-          { "opacity-50 cursor-not-allowed": disabled || uploading }
-        )}
-      >
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleFileInput}
-          hidden
-          disabled={disabled || uploading || value.length >= MAX_FILES}
-        />
+    <div>
+      <div className="mb-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+        {value.map((url, index) => (
+          <div
+            key={url}
+            className="relative w-full aspect-square rounded-md overflow-hidden"
+          >
+            <div className="z-10 absolute right-1 top-1">
+              <Button
+                type="button"
+                onClick={() => onRemove(url)}
+                variant="destructive"
+                size="icon"
+                className="w-6 h-6 cursor-pointer rounded-full"
+                disabled={loadingIndex !== null}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <Image fill className="object-cover" alt="Image" src={url} />
+          </div>
+        ))}
 
-        {value.length > 0 ? (
-          <div className="flex w-full flex-col gap-3">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="truncate text-sm font-medium">
-                Uploaded Files ({value.length})
-              </h3>
-              <div className="flex gap-2 flex-wrap justify-end">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleClick}
-                  disabled={value.length >= MAX_FILES}
-                >
-                  <UploadIcon className="-ms-0.5 size-3.5 opacity-60" />
-                  Add more
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleRemoveAll}
-                  disabled={value.length === 0}
-                >
-                  <Trash2Icon className="-ms-0.5 size-3.5 opacity-60" />
-                  Remove all
-                </Button>
+        {value.length < 4 &&
+          Array.from({ length: 4 - value.length }).map((_, i) => {
+            const absoluteIndex = value.length + i;
+            const isLoading = loadingIndex === absoluteIndex;
+            return (
+              <div
+                key={`placeholder-${absoluteIndex}`}
+                onClick={() => handlePlaceholderClick(absoluteIndex)}
+                className="relative w-full aspect-square rounded-md border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50 transition"
+                data-disabled={isLoading || disabled}
+              >
+                {isLoading ? (
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="w-5 h-5 border-b-2 border-gray-900 rounded-full animate-spin"></div>
+                    <p className="text-sm text-gray-500 mt-2">Uploading</p>
+                  </div>
+                ) : (
+                  <>
+                    <ImagePlus className="h-8 w-8 text-gray-400" />
+                    <p className="text-sm text-gray-500 mt-2">Upload</p>
+                  </>
+                )}
               </div>
-            </div>
-            <div className="flex flex-wrap gap-4">
-              {value.map((url) => (
-                <div
-                  key={url}
-                  className="bg-accent relative aspect-square w-[120px] rounded-md"
-                >
-                  <Image
-                    src={url}
-                    alt="Uploaded"
-                    fill
-                    className="rounded-[inherit] object-cover"
-                  />
-                  <Button
-                    type="button"
-                    onClick={() => onRemove(url)}
-                    size="icon"
-                    className="border-background focus-visible:border-background absolute -top-2 -right-2 size-6 rounded-full border-2 shadow-none"
-                    aria-label="Remove image"
-                    variant="destructive"
-                  >
-                    <XIcon className="size-3.5" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center px-4 py-3 text-center">
-            <div className="bg-background mb-2 flex size-11 shrink-0 items-center justify-center rounded-full border">
-              <ImageIcon className="size-4 opacity-60" />
-            </div>
-            <p className="mb-1.5 text-sm font-medium">
-              Drop your images here
-            </p>
-            <p className="text-muted-foreground text-xs">
-              PNG, JPG, GIF (max. {MAX_SIZE_MB}MB)
-            </p>
-            <Button
-              type="button"
-              variant="outline"
-              className="mt-4"
-              onClick={handleClick}
-              disabled={disabled || uploading || value.length >= MAX_FILES}
-            >
-              <UploadIcon className="-ms-1 opacity-60" />
-              {uploading
-                ? "Uploading...": "Select images"}
-            </Button>
-          </div>
-        )}
+            );
+          })}
       </div>
-
-      {errors.length > 0 && (
-        <div
-          className="text-destructive flex items-center gap-1 text-xs mt-2"
-          role="alert"
-        >
-          <AlertCircleIcon className="size-3 shrink-0" />
-          <span>{errors[0]}</span>
-        </div>
-      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={onFileSelect}
+        disabled={disabled || loadingIndex !== null || value.length >= 4}
+      />
     </div>
   );
 };
+
+export default ImageUpload;
