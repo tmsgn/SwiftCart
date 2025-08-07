@@ -8,7 +8,7 @@ import {
   ProductVariant,
   Variant,
   VariantValue,
-} from "../../../../../../generated/prisma";
+} from "../../../../../../../../generated/prisma";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -159,13 +159,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         if (initialData) {
           await updateProduct(params.productId as string, {
             ...data,
-          
           });
         } else {
-          await createProduct({ ...data, storeId: params.storeId as string });
+          await createProduct({ ...data, storeId: params.storeid as string });
         }
         router.refresh();
-        router.push(`/admin/stores/${params.storeId}/products`);
+        router.push(`${params.storeid}/admin/products`);
         toast.success(toastMessage);
       } catch (error: any) {
         toast.error("Something went wrong.");

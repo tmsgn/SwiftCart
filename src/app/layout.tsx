@@ -1,4 +1,5 @@
 import "@/app/globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +10,9 @@ export default function Layout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <ClerkProvider>
+        <body>{children}</body>
+      </ClerkProvider>
     </html>
   );
 }

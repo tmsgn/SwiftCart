@@ -17,11 +17,12 @@ import {
 } from "@/components/ui/table";
 import { SalesChart } from "./sales-chart";
 
-const Dashboard = async () => {
+const Dashboard = async ({ params }: { params: { storeid: string } }) => {
   // Fetch data
   const [products, orders, users] = await Promise.all([
-    prismadb.product.findMany(),
+    prismadb.product.findMany({ where: { storeId: params.storeid } }),
     prismadb.order.findMany({
+      where: { storeId: params.storeid },
       orderBy: { createdAt: "desc" },
       include: {
         buyer: true,

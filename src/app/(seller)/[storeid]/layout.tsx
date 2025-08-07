@@ -9,14 +9,36 @@ import {
   IconListDetails,
 } from "@tabler/icons-react";
 import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
+import prismadb from "@/lib/prismadb";
+import { Toaster } from "sonner";
 
 export const dynamic = "force-dynamic";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
+  params: { storeid },
 }: Readonly<{
   children: React.ReactNode;
+  params: { storeid: string };
 }>) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
+  const store = await prismadb.store.findFirst({
+    where: {
+      id: storeid,
+      userId: userId || "",
+    },
+  });
+
+  if (!store) {
+    redirect("/sign-in");
+  }
+
   return (
     <SidebarProvider
       style={
@@ -31,22 +53,22 @@ export default function AdminLayout({
         navMain={[
           {
             title: "Dashboard",
-            url: "/admin",
+            url: `/${storeid}/admin`,
             icon: <IconDashboard size={22} />,
           },
           {
             title: "Products",
-            url: "/admin/products",
+            url: `/${storeid}/admin/products`,
             icon: <IconFolder size={22} />,
           },
           {
             title: "Customers",
-            url: "/admin/users",
+            url: `/${storeid}/admin/users`,
             icon: <IconUsers size={22} />,
           },
           {
             title: "Orders",
-            url: "/admin/orders",
+            url: `/${storeid}/admin/orders`,
             icon: <IconListDetails size={22} />,
           },
         ]}
@@ -58,7 +80,9 @@ export default function AdminLayout({
       />
       <SidebarInset>
         <SiteHeader />
-        <div className="px-2 mt-2">{children}</div>
+        <div className="px-2 mt-2">
+          <Toaster/>
+          {children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

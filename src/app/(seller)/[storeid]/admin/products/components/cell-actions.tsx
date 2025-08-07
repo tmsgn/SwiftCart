@@ -19,6 +19,7 @@ import { AlertModal } from "@/components/alert-modal";
 import Link from "next/link";
 
 interface CellActionsProps {
+  storeId: string;
   productId: string;
   isAvailable: boolean;
 }
@@ -26,6 +27,7 @@ interface CellActionsProps {
 export const CellActions: React.FC<CellActionsProps> = ({
   productId,
   isAvailable,
+  storeId,
 }) => {
   const [isPending, startTransition] = useTransition();
   const [showAlert, setShowAlert] = useState(false);
@@ -70,16 +72,18 @@ export const CellActions: React.FC<CellActionsProps> = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <Link href={`/admin/products/${productId}`}>Update Product</Link>
+            <Link href={`/${storeId}/admin/products/${productId}`}>
+              Update Product
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="flex justify-between"
-            variant={status === "Available" ? "destructive" : "default"}
+            variant={isAvailable ? "destructive" : "default"}
             onClick={handleToggleStatus}
             disabled={isPending}
           >
-            {status === "Available" ? "Deactivate" : "Activate"}
+            {isAvailable ? "Deactivate" : "Activate"}
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={handleDelete}

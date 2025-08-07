@@ -6,8 +6,9 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-const Products = async () => {
+const Products = async ({ params }: { params: { storeid: string } }) => {
   const products = await prismadb.product.findMany({
+    where: { storeId: params.storeid },
     include: {
       variants: {
         include: {
@@ -22,6 +23,7 @@ const Products = async () => {
 
   const formattedProducts = products.map((product) => ({
     id: product.id,
+    storeId: product.storeId,
     name: product.name,
     isAvailable: product.isAvailable,
     price: product.variants[0]?.price ?? 0,
@@ -41,7 +43,7 @@ const Products = async () => {
           description="Manage your products and their variants."
         />
         <Button asChild>
-          <Link href="/admin/products/create">Create Product</Link>
+          <Link href={`/${params.storeid}/admin/products/create`}>Create Product</Link>
         </Button>
       </div>
       <DataTable columns={columns} data={formattedProducts} />

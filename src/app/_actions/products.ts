@@ -1,7 +1,6 @@
 "use server";
 
 import prismadb from "@/lib/prismadb";
-import { revalidatePath } from "next/cache";
 
 export async function createProduct(data: {
   name: string;
@@ -16,6 +15,7 @@ export async function createProduct(data: {
     sku: string;
     variantValueIds: string[];
   }[];
+  status?: string;
 }) {
   try {
     const product = await prismadb.product.create({
@@ -40,7 +40,6 @@ export async function createProduct(data: {
         },
       },
     });
-    revalidatePath(`/admin/products`);
     return product;
   } catch (error) {
     console.error("Product creation error:", error);
@@ -106,7 +105,5 @@ export async function updateProduct(
     return product;
   });
 
-  revalidatePath(`/admin/products`);
-  revalidatePath(`/admin/products/${productId}`);
   return updatedProduct;
 }

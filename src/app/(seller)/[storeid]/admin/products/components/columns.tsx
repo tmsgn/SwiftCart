@@ -7,6 +7,7 @@ import { CellActions } from "./cell-actions";
 
 export type Product = {
   id: string;
+  storeId: string;
   name: string;
   isAvailable: boolean
   stock: number;
@@ -27,7 +28,7 @@ export const columns: ColumnDef<Product>[] = [
       const isAvailable = row.original.isAvailable;
       return (
         <Badge variant={isAvailable ? "default" : "destructive"}>
-          {status}
+         {isAvailable ? "Available" : "Unavailable"}
         </Badge>
       );
     },
@@ -55,7 +56,7 @@ export const columns: ColumnDef<Product>[] = [
     id: "actions",
     header: "Actions",
     cell: ({ row }) => (
-      <CellActions productId={row.original.id} isAvailable={row.original.isAvailable} />
+      <CellActions storeId={row.original.storeId} productId={row.original.id} isAvailable={row.original.isAvailable} />
     ),
   },
 ];

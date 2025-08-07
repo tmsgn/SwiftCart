@@ -3,11 +3,11 @@ import { ProductForm } from "./components/product-form";
 import prismadb from "@/lib/prismadb";
 import { notFound } from "next/navigation";
 
-const ProductPage = async ({ params }: { params: { productid: string } }) => {
+const ProductPage = async ({ params }: { params: { productid: string; storeid: string } }) => {
   let initialData = null;
   if (params.productid !== "create") {
     initialData = await prismadb.product.findUnique({
-      where: { id: params.productid },
+      where: { id: params.productid, storeId: params.storeid },
       include: {
         images: true,
         variants: {
