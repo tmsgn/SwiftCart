@@ -11,7 +11,9 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
+  // Apply overrides for TypeScript files explicitly to ensure they take precedence
   {
+    files: ["**/*.ts", "**/*.tsx"],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": [
@@ -22,7 +24,11 @@ const eslintConfig = [
           ignoreRestSiblings: true,
         },
       ],
-      // Let TS plugin handle unused vars
+    },
+  },
+  {
+    // Let TS plugin handle unused vars
+    rules: {
       "no-unused-vars": "off",
     },
   },
