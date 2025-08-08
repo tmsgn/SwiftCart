@@ -1,21 +1,31 @@
 import prismadb from "@/lib/prismadb";
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-import RootPageClient from "./page-clinet";
+import ProductCard from "./components/product-card";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "SwiftCart — Home",
+  description: "Discover the latest products and best deals on SwiftCart.",
+};
 
 const RootPage = async () => {
-  const { userId } = await auth();
-  const store = await prismadb.store.findFirst({
-    where: {
-      userId: userId || undefined,
+  const products = await prismadb.product.findMany({
+    where: { isAvailable: true },
+    orderBy: { createdAt: "desc" },
+    take: 10,
+    include: {
+      images: true,
+      variants: true,
+      reviews: true,
     },
   });
 
-  if (store) {
-    redirect(`/${store.id}/admin`);
-  }
-
-  return <RootPageClient/>
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5 p-8">
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
 };
 
 export default RootPage;

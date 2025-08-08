@@ -147,13 +147,7 @@ export function ProductDetailsClient({
             className="w-full text-lg py-4"
             disabled={!selectedVariant || selectedVariant.stock < 1}
           >
-            <Link
-              href={
-                selectedVariant
-                  ? `${product.id}/purchase`
-                  : "#"
-              }
-            >
+            <Link href={selectedVariant ? `${product.id}/purchase` : "#"}>
               {selectedVariant && selectedVariant.stock > 0
                 ? "Buy Now"
                 : "Out of Stock"}

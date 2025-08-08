@@ -8,11 +8,9 @@ async function main() {
   await prisma.variantValue.deleteMany();
   await prisma.variant.deleteMany();
 
-  // Clear users and stores for a clean slate
+  // Clear buyers and stores for a clean slate
   await prisma.store.deleteMany();
-  await prisma.user.deleteMany();
-
-  
+  await prisma.buyer.deleteMany();
 
   console.log(`Start seeding catalog data...`);
 

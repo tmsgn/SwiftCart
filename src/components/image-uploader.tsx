@@ -11,7 +11,7 @@ interface ImageUploadProps {
   disabled?: boolean;
   onChange: (value: string) => void;
   onRemove: (value: string) => void;
-  value: string[];
+  value?: string; // single image URL (optional)
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -20,12 +20,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   onRemove,
   value,
 }) => {
-  const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const uploadTargetIndex = useRef<number | null>(null);
 
   const handleUpload = async (file: File) => {
     try {
+      setLoading(true);
       const formData = new FormData();
       formData.append("file", file);
       formData.append("upload_preset", "my_preset");
@@ -48,83 +48,68 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     } catch (error) {
       toast.error("Something went wrong during upload.");
     } finally {
-      setLoadingIndex(null);
+      setLoading(false);
     }
   };
 
   const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      if (uploadTargetIndex.current !== null) {
-        setLoadingIndex(uploadTargetIndex.current);
-        handleUpload(e.target.files[0]);
-      }
+      handleUpload(e.target.files[0]);
     }
+    // reset input so the same file can be selected again if needed
     e.target.value = "";
   };
 
-  const handlePlaceholderClick = (index: number) => {
-    if (disabled || loadingIndex !== null) return;
-    uploadTargetIndex.current = index;
+  const openPicker = () => {
+    if (disabled || loading) return;
     inputRef.current?.click();
   };
 
   return (
-    <div>
-      <div className="mb-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-        {value.map((url, index) => (
-          <div
-            key={url}
-            className="relative w-full aspect-square rounded-md overflow-hidden"
-          >
-            <div className="z-10 absolute right-1 top-1">
-              <Button
-                type="button"
-                onClick={() => onRemove(url)}
-                variant="destructive"
-                size="icon"
-                className="w-6 h-6 cursor-pointer rounded-full"
-                disabled={loadingIndex !== null}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <Image fill className="object-cover" alt="Image" src={url} />
+    <div className="inline-block">
+      {value ? (
+        <div className="relative w-[140px] h-[96px] rounded-md overflow-hidden border">
+          <div className="z-10 absolute right-1 top-1">
+            <Button
+              type="button"
+              onClick={() => onRemove(value)}
+              variant="destructive"
+              size="icon"
+              className="w-6 h-6 cursor-pointer rounded-full"
+              disabled={loading || disabled}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-        ))}
-
-        {value.length < 4 &&
-          Array.from({ length: 4 - value.length }).map((_, i) => {
-            const absoluteIndex = value.length + i;
-            const isLoading = loadingIndex === absoluteIndex;
-            return (
-              <div
-                key={`placeholder-${absoluteIndex}`}
-                onClick={() => handlePlaceholderClick(absoluteIndex)}
-                className="relative w-full aspect-square rounded-md border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50 transition"
-                data-disabled={isLoading || disabled}
-              >
-                {isLoading ? (
-                  <div className="flex flex-col items-center justify-center">
-                    <div className="w-5 h-5 border-b-2 border-gray-900 rounded-full animate-spin"></div>
-                    <p className="text-sm text-gray-500 mt-2">Uploading</p>
-                  </div>
-                ) : (
-                  <>
-                    <ImagePlus className="h-8 w-8 text-gray-400" />
-                    <p className="text-sm text-gray-500 mt-2">Upload</p>
-                  </>
-                )}
-              </div>
-            );
-          })}
-      </div>
+          <Image fill className="object-cover" alt="Image" src={value} />
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={openPicker}
+          className="relative w-[140px] h-[96px] rounded-md border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 disabled:cursor-not-allowed disabled:opacity-50 transition bg-white"
+          disabled={disabled || loading}
+        >
+          {loading ? (
+            <div className="flex flex-col items-center justify-center">
+              <div className="w-5 h-5 border-b-2 border-gray-900 rounded-full animate-spin"></div>
+              <p className="text-sm text-gray-500 mt-2">Uploading</p>
+            </div>
+          ) : (
+            <>
+              <ImagePlus className="h-6 w-6 text-gray-400" />
+              <p className="text-sm text-gray-500 mt-1">Upload</p>
+            </>
+          )}
+        </button>
+      )}
       <input
         ref={inputRef}
         type="file"
         accept="image/*"
         hidden
         onChange={onFileSelect}
-        disabled={disabled || loadingIndex !== null || value.length >= 4}
+        disabled={disabled || loading}
       />
     </div>
   );

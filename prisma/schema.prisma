@@ -4,8 +4,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum OrderStatus {
@@ -14,27 +15,35 @@ enum OrderStatus {
   CANCELLED
 }
 
-
-model User {
-  id        String     @id
+model Buyer {
+  id        String    @id
   name      String
-  email     String     @unique
+  email     String    @unique
   addresses Address[]
-  cartItems CartItem[]
-  createdAt DateTime   @default(now())
+  createdAt DateTime  @default(now())
   orders    Order[]
   reviews   Review[]
 }
 
 model Store {
-  id          String    @id @default(uuid())
-  name        String    @unique
-  description String?
-  userId      String    @unique
-  products    Product[]
-  orders      Order[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id        String      @id @default(uuid())
+  name      String      @unique
+  userId    String      @unique
+  products  Product[]
+  orders    Order[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  Billboard Billboard[]
+}
+
+model Billboard {
+  id          String @id @default(uuid())
+  title       String @unique
+  storeId     String
+  store       Store  @relation(fields: [storeId], references: [id])
+  descriprion String
+  image       Image  @relation(fields: [imageId], references: [id])
+  imageId     String
 }
 
 model Address {
@@ -44,24 +53,15 @@ model Address {
   state      String
   postalCode String
   country    String
-  userId     String
-  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model CartItem {
-  id               String         @id @default(uuid())
-  userId           String
-  user             User           @relation(fields: [userId], references: [id])
-  productVariantId String
-  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
-  quantity         Int            @default(1)
-  createdAt        DateTime       @default(now())
+  buyerId    String
+  buyer      Buyer  @relation(fields: [buyerId], references: [id], onDelete: Cascade)
 }
 
 model Product {
   id          String           @id @default(uuid())
   name        String
   description String
+  price       Float
   isAvailable Boolean          @default(false)
   storeId     String
   store       Store            @relation(fields: [storeId], references: [id], onDelete: Cascade)
@@ -82,7 +82,6 @@ model ProductVariant {
   productId     String
   product       Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
   variantValues VariantValue[]
-  cartItems     CartItem[]
   orderItems    OrderItem[]
 }
 
@@ -114,16 +113,17 @@ model Category {
 }
 
 model Image {
-  id        String  @id @default(cuid())
+  id        String      @id @default(cuid())
   url       String
   productId String
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  Billboard Billboard[]
 }
 
 model Order {
   id                 String      @id @default(uuid())
   buyerId            String
-  buyer              User        @relation(fields: [buyerId], references: [id])
+  buyer              Buyer       @relation(fields: [buyerId], references: [id])
   storeId            String
   store              Store       @relation(fields: [storeId], references: [id])
   pricePaid          Float
@@ -152,8 +152,8 @@ model Review {
   id        String   @id @default(uuid())
   rating    Int
   comment   String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  buyerId   String
+  buyer     Buyer    @relation(fields: [buyerId], references: [id])
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())

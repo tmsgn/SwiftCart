@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { createStoreAction } from "@/app/_actions/store";
 
 export function StoreModal({
   isOpen,
@@ -42,7 +43,7 @@ export function StoreModal({
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (storeData.name === (initialData?.name || "")) {
       toast.info("No changes detected.");
@@ -50,24 +51,9 @@ export function StoreModal({
     }
     try {
       setLoading(true);
-      const userId = user?.id;
-      if (!userId) throw new Error("User ID not found");
-      const response = await fetch("/api/stores", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name: storeData.name, userId }),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to create store");
-      }
-      const store = await response.json();
-
-      toast.success("Store created successfully");
-      router.refresh();
-      onClose();
-      window.location.assign(`/${store.id}/admin`);
+      const fd = new FormData();
+      fd.append("name", storeData.name);
+      await createStoreAction(fd);
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
       console.log("Failed to create store:", error);

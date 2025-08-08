@@ -47,7 +47,7 @@ export const ProductCard = ({
       </CardContent>
       <CardFooter>
         <Button asChild size="lg" className="w-full">
-          <Link href={`/products/${id}/purchase`}>Buy</Link>
+          <Link href={`/${id}`}>Buy</Link>
         </Button>
       </CardFooter>
     </Card>
