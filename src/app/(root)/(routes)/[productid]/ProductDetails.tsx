@@ -136,7 +136,12 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
       productName: product.name,
       imageUrl: product.images[0]?.url,
       attributes: Object.fromEntries(
-  currentVariant.variantValues.map((vv: (typeof currentVariant.variantValues)[number]) => [vv.variant.name, vv.value])
+        currentVariant.variantValues.map(
+          (vv: (typeof currentVariant.variantValues)[number]) => [
+            vv.variant.name,
+            vv.value,
+          ]
+        )
       ),
     });
   };
@@ -150,7 +155,12 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
       productName: product.name,
       imageUrl: product.images[0]?.url,
       attributes: Object.fromEntries(
-  currentVariant.variantValues.map((vv: (typeof currentVariant.variantValues)[number]) => [vv.variant.name, vv.value])
+        currentVariant.variantValues.map(
+          (vv: (typeof currentVariant.variantValues)[number]) => [
+            vv.variant.name,
+            vv.value,
+          ]
+        )
       ),
     });
     router.push("/cart");
@@ -243,44 +253,46 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
 
           {/* Variant Selectors */}
           <div className="flex flex-col gap-6">
-            {Object.entries(organizedVariants).map(([variantName, values]: [string, string[]]) => (
-              <div key={variantName} className="flex flex-col gap-3">
-                <Label className="text-base font-medium">
-                  {variantName}:{" "}
-                  <span className="text-muted-foreground">
-                    {selectedVariants[variantName]}
-                  </span>
-                </Label>
-                <RadioGroup
-                  value={selectedVariants[variantName]}
-                  onValueChange={(value) =>
-                    handleVariantChange(variantName, value)
-                  }
-                  className="flex flex-wrap gap-2"
-                >
-                  {values.map((value: string) => (
-                    <div key={value}>
-                      <RadioGroupItem
-                        value={value}
-                        id={`${variantName}-${value}`}
-                        className="sr-only"
-                      />
-                      <Label
-                        htmlFor={`${variantName}-${value}`}
-                        className={cn(
-                          "px-3.5 py-1.5 text-sm border rounded-full cursor-pointer transition-colors",
-                          "hover:bg-accent hover:text-accent-foreground",
-                          selectedVariants[variantName] === value &&
-                            "bg-primary text-primary-foreground border-primary"
-                        )}
-                      >
-                        {value}
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              </div>
-            ))}
+            {Object.entries(organizedVariants).map(
+              ([variantName, values]: [string, string[]]) => (
+                <div key={variantName} className="flex flex-col gap-3">
+                  <Label className="text-base font-medium">
+                    {variantName}:{" "}
+                    <span className="text-muted-foreground">
+                      {selectedVariants[variantName]}
+                    </span>
+                  </Label>
+                  <RadioGroup
+                    value={selectedVariants[variantName]}
+                    onValueChange={(value) =>
+                      handleVariantChange(variantName, value)
+                    }
+                    className="flex flex-wrap gap-2"
+                  >
+                    {values.map((value: string) => (
+                      <div key={value}>
+                        <RadioGroupItem
+                          value={value}
+                          id={`${variantName}-${value}`}
+                          className="sr-only"
+                        />
+                        <Label
+                          htmlFor={`${variantName}-${value}`}
+                          className={cn(
+                            "px-3.5 py-1.5 text-sm border rounded-full cursor-pointer transition-colors",
+                            "hover:bg-accent hover:text-accent-foreground",
+                            selectedVariants[variantName] === value &&
+                              "bg-primary text-primary-foreground border-primary"
+                          )}
+                        >
+                          {value}
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+              )
+            )}
           </div>
 
           {/* Action Buttons */}

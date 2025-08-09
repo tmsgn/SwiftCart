@@ -37,7 +37,10 @@ export default async function OrdersPage(props: {
     buyerName: o.buyer?.name || "Unknown",
     buyerEmail: o.buyer?.email || "",
     total: o.pricePaid,
-    items: o.orderItems.reduce((s, it) => s + it.quantity, 0),
+    items: o.orderItems.reduce(
+      (s: number, it: (typeof o.orderItems)[number]) => s + it.quantity,
+      0
+    ),
     status: o.status,
   }));
 
