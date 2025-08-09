@@ -42,7 +42,7 @@ const Dashboard = async (props: { params: Promise<{ storeid: string }> }) => {
 
   // Aggregate data
   const totalSales = orders.reduce(
-    (sum: number, order: any) => sum + order.pricePaid,
+    (sum: number, order: (typeof orders)[number]) => sum + order.pricePaid,
     0
   );
   const totalOrders = orders.length;
@@ -51,7 +51,7 @@ const Dashboard = async (props: { params: Promise<{ storeid: string }> }) => {
 
   // Sales by day for chart
   const salesByDay: { date: string; sales: number }[] = [];
-  orders.forEach((order: any) => {
+  orders.forEach((order: (typeof orders)[number]) => {
     const date = order.createdAt.toISOString().split("T")[0];
     const existing = salesByDay.find((d) => d.date === date);
     if (existing) existing.sales += order.pricePaid;
@@ -135,7 +135,7 @@ const Dashboard = async (props: { params: Promise<{ storeid: string }> }) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentOrders.map((order) => (
+                {recentOrders.map((order: (typeof recentOrders)[number]) => (
                   <TableRow key={order.id}>
                     <TableCell>
                       {order.createdAt.toLocaleDateString()}
@@ -147,7 +147,7 @@ const Dashboard = async (props: { params: Promise<{ storeid: string }> }) => {
                       {order.orderItems && order.orderItems.length > 0
                         ? order.orderItems
                             .map(
-                              (item: any) =>
+                              (item: (typeof order.orderItems)[number]) =>
                                 item.productVariant?.product?.name || "-"
                             )
                             .join(", ")

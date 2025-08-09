@@ -116,15 +116,17 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           name: initialData.name,
           description: initialData.description,
           price: Number(initialData.price ?? 0),
-          images: initialData.images.map((img) => ({ url: img.url })),
+          images: initialData.images.map((img: Image) => ({ url: img.url })),
           categoryId: initialData.categoryId ?? "",
           isAvailable: initialData.isAvailable,
-          variants: initialData.variants.map((v) => ({
-            price: Number(v.price),
-            stock: Number(v.stock),
-            sku: v.sku,
-            variantValueIds: v.variantValues.map((vv) => vv.id),
-          })),
+          variants: initialData.variants.map(
+            (v: ProductVariant & { variantValues: VariantValue[] }) => ({
+              price: Number(v.price),
+              stock: Number(v.stock),
+              sku: v.sku,
+              variantValueIds: v.variantValues.map((vv: VariantValue) => vv.id),
+            })
+          ),
         }
       : {
           name: "",
@@ -144,7 +146,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       const category = categories.find((c) => c.id === selectedSubCategoryId);
       if (category) {
         const categoryVariantNames = new Set(
-          category.variants.map((v) => v.name)
+          category.variants.map((v: Variant) => v.name)
         );
         setFilteredVariantOptions(
           allVariantOptions.filter((v) => categoryVariantNames.has(v.name))
@@ -179,10 +181,15 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     });
   };
 
-  const parentCategories = categories.filter((category) => !category.parent);
+  const parentCategories = categories.filter(
+    (category: Category & { parent: Category | null; variants: Variant[] }) =>
+      !category.parent
+  );
   const subCategories = selectedParentCategoryId
     ? categories.filter(
-        (category) => category.parentId === selectedParentCategoryId
+        (
+          category: Category & { parent: Category | null; variants: Variant[] }
+        ) => category.parentId === selectedParentCategoryId
       )
     : [];
 
@@ -354,40 +361,43 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   <FormItem>
                     <FormControl>
                       <div className="flex gap-3 flex-wrap">
-                        {Array.from({ length: 4 }).map((_, slotIndex) => {
-                          const url = field.value[slotIndex]?.url;
-                          return (
-                            <ImageUpload
-                              key={slotIndex}
-                              value={url}
-                              disabled={isPending}
-                              onChange={(newUrl) => {
-                                const next = [...field.value];
-                                if (slotIndex < next.length) {
-                                  next[slotIndex] = { url: newUrl };
-                                } else {
-                                  next.push({ url: newUrl });
-                                }
-                                field.onChange(next);
-                              }}
-                              onRemove={(removeUrl) => {
-                                const next = [...field.value];
-                                if (
-                                  slotIndex < next.length &&
-                                  next[slotIndex]?.url === removeUrl
-                                ) {
-                                  next.splice(slotIndex, 1);
-                                } else {
-                                  const idx = next.findIndex(
-                                    (i) => i.url === removeUrl
-                                  );
-                                  if (idx !== -1) next.splice(idx, 1);
-                                }
-                                field.onChange(next);
-                              }}
-                            />
-                          );
-                        })}
+                        {Array.from({ length: 4 }).map(
+                          (_: unknown, slotIndex: number) => {
+                            const url = field.value[slotIndex]?.url;
+                            return (
+                              <ImageUpload
+                                key={slotIndex}
+                                value={url}
+                                disabled={isPending}
+                                onChange={(newUrl) => {
+                                  const next = [...field.value];
+                                  if (slotIndex < next.length) {
+                                    next[slotIndex] = { url: newUrl };
+                                  } else {
+                                    next.push({ url: newUrl });
+                                  }
+                                  field.onChange(next);
+                                }}
+                                onRemove={(removeUrl) => {
+                                  const next = [...field.value];
+                                  if (
+                                    slotIndex < next.length &&
+                                    next[slotIndex]?.url === removeUrl
+                                  ) {
+                                    next.splice(slotIndex, 1);
+                                  } else {
+                                    const idx = next.findIndex(
+                                      (i: { url: string }) =>
+                                        i.url === removeUrl
+                                    );
+                                    if (idx !== -1) next.splice(idx, 1);
+                                  }
+                                  field.onChange(next);
+                                }}
+                              />
+                            );
+                          }
+                        )}
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -404,7 +414,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {fields.map((field, index) => (
+              {fields.map((field, index: number) => (
                 <div
                   key={field.id}
                   className="p-4 border rounded-lg space-y-4 relative"
@@ -487,38 +497,49 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       <FormItem>
                         <FormLabel>Options</FormLabel>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                          {filteredVariantOptions.map((optionType) => (
-                            <Select
-                              key={optionType.id}
-                              onValueChange={(value) => {
-                                const otherValues = field.value.filter(
-                                  (id) =>
-                                    !optionType.values.some((v) => v.id === id)
-                                );
-                                field.onChange([...otherValues, value]);
-                              }}
-                              value={
-                                field.value.find((id) =>
-                                  optionType.values.some((v) => v.id === id)
-                                ) || ""
-                              }
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue
-                                    placeholder={`Select ${optionType.name}`}
-                                  />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {optionType.values.map((value) => (
-                                  <SelectItem key={value.id} value={value.id}>
-                                    {value.value}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          ))}
+                          {filteredVariantOptions.map(
+                            (
+                              optionType: Variant & { values: VariantValue[] }
+                            ) => (
+                              <Select
+                                key={optionType.id}
+                                onValueChange={(value) => {
+                                  const otherValues = field.value.filter(
+                                    (id) =>
+                                      !optionType.values.some(
+                                        (v) => v.id === id
+                                      )
+                                  );
+                                  field.onChange([...otherValues, value]);
+                                }}
+                                value={
+                                  field.value.find((id) =>
+                                    optionType.values.some((v) => v.id === id)
+                                  ) || ""
+                                }
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue
+                                      placeholder={`Select ${optionType.name}`}
+                                    />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {optionType.values.map(
+                                    (value: VariantValue) => (
+                                      <SelectItem
+                                        key={value.id}
+                                        value={value.id}
+                                      >
+                                        {value.value}
+                                      </SelectItem>
+                                    )
+                                  )}
+                                </SelectContent>
+                              </Select>
+                            )
+                          )}
                         </div>
                         <FormMessage />
                       </FormItem>
