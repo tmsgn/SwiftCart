@@ -108,7 +108,14 @@ export async function updateProduct(
 
       // Variants: upsert by id or SKU and keep referenced ones
       if (Array.isArray(data.variants)) {
-        const existing = await tx.productVariant.findMany({
+        type ExistingVariant = Prisma.ProductVariantGetPayload<{
+          include: {
+            variantValues: { select: { id: true } };
+            orderItems: { select: { id: true } };
+          };
+        }>;
+
+        const existing: ExistingVariant[] = await tx.productVariant.findMany({
           where: { productId },
           include: {
             variantValues: { select: { id: true } },
@@ -116,11 +123,19 @@ export async function updateProduct(
           },
         });
 
-        const byId = new Map(existing.map((v) => [v.id, v] as const));
-        const bySku = new Map(existing.map((v) => [v.sku, v] as const));
+        const byId = new Map(existing.map((v: ExistingVariant) => [v.id, v] as const));
+        const bySku = new Map(existing.map((v: ExistingVariant) => [v.sku, v] as const));
         const keptIds = new Set<string>();
 
-        for (const v of data.variants) {
+        type IncomingVariant = {
+          id?: string;
+          price: number;
+          stock: number;
+          sku: string;
+          variantValueIds: string[];
+        };
+
+        for (const v of data.variants as IncomingVariant[]) {
           const price = Number(v.price);
           const stock = Number(v.stock);
           if (Number.isNaN(price) || Number.isNaN(stock)) {
@@ -146,7 +161,7 @@ export async function updateProduct(
           }
 
           // Validate all variantValueIds exist
-          const vvIds = Array.isArray(v.variantValueIds)
+          const vvIds: string[] = Array.isArray(v.variantValueIds)
             ? v.variantValueIds
             : [];
           if (vvIds.length) {
