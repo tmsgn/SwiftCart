@@ -100,7 +100,7 @@ export default async function MyOrdersPage() {
         </Card>
       ) : (
         <div className="space-y-6">
-          {orders.map((order) => (
+          {orders.map((order: (typeof orders)[number]) => (
             <Card key={order.id}>
               <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div className="space-y-1">
