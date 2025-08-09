@@ -3,6 +3,7 @@
 import prismadb from "@/lib/prismadb";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import type { Prisma } from "@prisma/client";
 
 export async function placeOrderAction(formData: FormData) {
   const { userId } = await auth();
@@ -121,37 +122,39 @@ export async function placeOrderAction(formData: FormData) {
   }
 
   // Create order and decrement stock in a transaction
-  const order = await prismadb.$transaction(async (tx) => {
-    // Atomically decrement stock with a conditional check to avoid race conditions
-    for (const it of orderItemsData) {
-      const updated = await tx.productVariant.updateMany({
-        where: { id: it.productVariantId, stock: { gte: it.quantity } },
-        data: { stock: { decrement: it.quantity } },
-      });
-      if (updated.count === 0) {
-        throw new Error("Insufficient stock for an item");
+  const order = await prismadb.$transaction(
+    async (tx: Prisma.TransactionClient) => {
+      // Atomically decrement stock with a conditional check to avoid race conditions
+      for (const it of orderItemsData) {
+        const updated = await tx.productVariant.updateMany({
+          where: { id: it.productVariantId, stock: { gte: it.quantity } },
+          data: { stock: { decrement: it.quantity } },
+        });
+        if (updated.count === 0) {
+          throw new Error("Insufficient stock for an item");
+        }
       }
-    }
 
-    // Create order after all stock operations succeed
-    const created = await tx.order.create({
-      data: {
-        buyerId: userId,
-        storeId,
-        pricePaid,
-        platformFee: 0,
-        shippingStreet: shippingStreet,
-        shippingCity: shippingCity,
-        shippingPostalCode: shippingPostalCode,
-        orderItems: {
-          create: orderItemsData,
+      // Create order after all stock operations succeed
+      const created = await tx.order.create({
+        data: {
+          buyerId: userId,
+          storeId,
+          pricePaid,
+          platformFee: 0,
+          shippingStreet: shippingStreet,
+          shippingCity: shippingCity,
+          shippingPostalCode: shippingPostalCode,
+          orderItems: {
+            create: orderItemsData,
+          },
         },
-      },
-      include: { orderItems: true },
-    });
+        include: { orderItems: true },
+      });
 
-    return created;
-  });
+      return created;
+    }
+  );
 
   redirect(`/checkout/success?orderId=${order.id}`);
 }
