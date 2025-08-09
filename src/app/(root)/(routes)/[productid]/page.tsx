@@ -61,8 +61,8 @@ export async function generateMetadata(
       product.category ? ` in ${product.category.name}` : ""
     }.`;
 
-  const images = product.images?.length
-    ? product.images.map((img) => ({ url: img.url }))
+  const images: { url: string }[] = product.images?.length
+    ? product.images.map((img: { url: string }) => ({ url: img.url }))
     : [{ url: "/og-default.png" }];
 
   return {
