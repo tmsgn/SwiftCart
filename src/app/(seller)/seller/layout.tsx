@@ -16,11 +16,12 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminLayout({
   children,
-  params: { storeid },
+  params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { storeid: string };
+  params: Promise<{ storeid?: string }>;
 }>) {
+  const { storeid } = await params;
   const { userId } = await auth();
 
   if (!userId) {
@@ -32,11 +33,15 @@ export default async function AdminLayout({
       userId: userId || "",
     },
   });
-  if (!store) {
+
+  if (!store && storeid) {
     redirect("/seller");
   }
 
-  // Resolve a usable store id for navigation
+  if (!store && !storeid) {
+    return <>{children}</>;
+  }
+
   const resolvedStoreId = storeid ?? store?.id;
   const buildUrl = (suffix: string) =>
     resolvedStoreId ? `/seller/${resolvedStoreId}${suffix}` : "/seller";

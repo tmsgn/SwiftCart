@@ -3,16 +3,13 @@ import { notFound } from "next/navigation";
 import { ProductDetails } from "./ProductDetails";
 import type { Metadata, ResolvingMetadata } from "next";
 
-interface ProductPageProps {
-  params: {
-    productid: string;
-  };
-}
-
-const ProductPage = async ({ params }: ProductPageProps) => {
+const ProductPage = async (props: {
+  params: Promise<{ productid: string }>;
+}) => {
+  const { productid } = await props.params;
   const product = await prismadb.product.findUnique({
     where: {
-      id: params.productid,
+      id: productid,
     },
     include: {
       images: true,
@@ -38,11 +35,12 @@ const ProductPage = async ({ params }: ProductPageProps) => {
 };
 
 export async function generateMetadata(
-  { params }: { params: { productid: string } },
+  { params }: { params: Promise<{ productid: string }> },
   _parent: ResolvingMetadata
 ): Promise<Metadata> {
+  const { productid } = await params;
   const product = await prismadb.product.findUnique({
-    where: { id: params.productid },
+    where: { id: productid },
     include: { images: true, category: true },
   });
 

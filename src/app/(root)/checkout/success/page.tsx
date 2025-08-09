@@ -11,12 +11,10 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: { orderId?: string };
+export default async function Page(props: {
+  searchParams: Promise<{ orderId?: string }>;
 }) {
-  const orderId = searchParams.orderId;
+  const { orderId } = await props.searchParams;
 
   const products: Array<{ id: string; name: string }> = [];
   if (orderId) {

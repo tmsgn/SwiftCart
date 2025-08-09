@@ -5,11 +5,12 @@ import { PageHeader } from "@/components/page-header";
 import type { Metadata, ResolvingMetadata } from "next";
 
 export async function generateMetadata(
-  { params }: { params: { storeid: string } },
+  { params }: { params: Promise<{ storeid: string }> },
   _parent: ResolvingMetadata
 ): Promise<Metadata> {
+  const { storeid } = await params;
   const store = await prismadb.store.findUnique({
-    where: { id: params.storeid },
+    where: { id: storeid },
   });
   const name = store?.name || "Store";
   const title = `${name} — Orders | SwiftCart`;
@@ -17,13 +18,12 @@ export async function generateMetadata(
   return { title, description, robots: { index: false } };
 }
 
-export default async function OrdersPage({
-  params,
-}: {
-  params: { storeid: string };
+export default async function OrdersPage(props: {
+  params: Promise<{ storeid: string }>;
 }) {
+  const { storeid } = await props.params;
   const orders = await prismadb.order.findMany({
-    where: { storeId: params.storeid },
+    where: { storeId: storeid },
     include: {
       buyer: true,
       orderItems: true,

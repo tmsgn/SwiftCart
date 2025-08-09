@@ -18,12 +18,13 @@ import {
 import { SalesChart } from "./sales-chart";
 import type { Metadata, ResolvingMetadata } from "next";
 
-const Dashboard = async ({ params }: { params: { storeid: string } }) => {
+const Dashboard = async (props: { params: Promise<{ storeid: string }> }) => {
+  const { storeid } = await props.params;
   // Fetch data
   const [products, orders, buyers] = await Promise.all([
-    prismadb.product.findMany({ where: { storeId: params.storeid } }),
+    prismadb.product.findMany({ where: { storeId: storeid } }),
     prismadb.order.findMany({
-      where: { storeId: params.storeid },
+      where: { storeId: storeid },
       orderBy: { createdAt: "desc" },
       include: {
         buyer: true,
@@ -169,11 +170,12 @@ const Dashboard = async ({ params }: { params: { storeid: string } }) => {
 };
 
 export async function generateMetadata(
-  { params }: { params: { storeid: string } },
+  { params }: { params: Promise<{ storeid: string }> },
   _parent: ResolvingMetadata
 ): Promise<Metadata> {
+  const { storeid } = await params;
   const store = await prismadb.store.findUnique({
-    where: { id: params.storeid },
+    where: { id: storeid },
   });
   const name = store?.name || "Store";
   const title = `${name} — Dashboard | SwiftCart`;

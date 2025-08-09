@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import type { Metadata, ResolvingMetadata } from "next";
 
-const Products = async ({ params }: { params: { storeid: string } }) => {
+const Products = async (props: { params: Promise<{ storeid: string }> }) => {
+  const { storeid } = await props.params;
   const products = await prismadb.product.findMany({
-    where: { storeId: params.storeid },
+    where: { storeId: storeid },
     include: {
       variants: {
         include: {
@@ -44,7 +45,7 @@ const Products = async ({ params }: { params: { storeid: string } }) => {
           description="Manage your products and their variants."
         />
         <Button asChild>
-          <Link href={`/seller/${params.storeid}/products/create`}>
+          <Link href={`/seller/${storeid}/products/create`}>
             Create Product
           </Link>
         </Button>
@@ -55,11 +56,12 @@ const Products = async ({ params }: { params: { storeid: string } }) => {
 };
 
 export async function generateMetadata(
-  { params }: { params: { storeid: string } },
+  { params }: { params: Promise<{ storeid: string }> },
   _parent: ResolvingMetadata
 ): Promise<Metadata> {
+  const { storeid } = await params;
   const store = await prismadb.store.findUnique({
-    where: { id: params.storeid },
+    where: { id: storeid },
   });
   const name = store?.name || "Store";
   const title = `${name} — Products | SwiftCart`;

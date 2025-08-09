@@ -4,15 +4,14 @@ import prismadb from "@/lib/prismadb";
 import { notFound } from "next/navigation";
 import type { Metadata, ResolvingMetadata } from "next";
 
-const ProductPage = async ({
-  params,
-}: {
-  params: { productid: string; storeid: string };
+const ProductPage = async (props: {
+  params: Promise<{ productid: string; storeid: string }>;
 }) => {
+  const { productid, storeid } = await props.params;
   let initialData = null;
-  if (params.productid !== "create") {
+  if (productid !== "create") {
     initialData = await prismadb.product.findUnique({
-      where: { id: params.productid, storeId: params.storeid },
+      where: { id: productid, storeId: storeid },
       include: {
         images: true,
         variants: {
@@ -49,10 +48,11 @@ const ProductPage = async ({
 };
 
 export async function generateMetadata(
-  { params }: { params: { storeid: string; productid: string } },
+  { params }: { params: Promise<{ storeid: string; productid: string }> },
   _parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const isCreate = params.productid === "create";
+  const { productid, storeid } = await params;
+  const isCreate = productid === "create";
   if (isCreate) {
     return {
       title: "Create Product — SwiftCart",
@@ -61,7 +61,7 @@ export async function generateMetadata(
     };
   }
   const product = await prismadb.product.findUnique({
-    where: { id: params.productid, storeId: params.storeid },
+    where: { id: productid, storeId: storeid },
     select: { name: true },
   });
   const name = product?.name || "Product";
