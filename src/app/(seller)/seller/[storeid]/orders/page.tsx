@@ -31,7 +31,7 @@ export default async function OrdersPage(props: {
     orderBy: { createdAt: "desc" },
   });
 
-  const rows: OrderRow[] = orders.map((o) => ({
+  const rows: OrderRow[] = orders.map((o: (typeof orders)[number]) => ({
     id: o.id,
     createdAt: o.createdAt.toISOString(),
     buyerName: o.buyer?.name || "Unknown",

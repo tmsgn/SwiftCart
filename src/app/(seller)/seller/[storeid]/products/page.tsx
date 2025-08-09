@@ -23,15 +23,18 @@ const Products = async (props: { params: Promise<{ storeid: string }> }) => {
     },
   });
 
-  const formattedProducts = products.map((product) => ({
+  const formattedProducts = products.map((product: (typeof products)[number]) => ({
     id: product.id,
     storeId: product.storeId,
     name: product.name,
     isAvailable: product.isAvailable,
     price: product.variants[0]?.price ?? 0,
-    stock: product.variants.reduce((sum, variant) => sum + variant.stock, 0),
+    stock: product.variants.reduce(
+      (sum: number, variant: (typeof product.variants)[number]) => sum + variant.stock,
+      0
+    ),
     orders: product.variants.reduce(
-      (sum, variant) => sum + (variant.orderItems?.length ?? 0),
+      (sum: number, variant: (typeof product.variants)[number]) => sum + (variant.orderItems?.length ?? 0),
       0
     ),
     createdAt: product.createdAt.toISOString(),

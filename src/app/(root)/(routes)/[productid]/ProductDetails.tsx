@@ -136,7 +136,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
       productName: product.name,
       imageUrl: product.images[0]?.url,
       attributes: Object.fromEntries(
-        currentVariant.variantValues.map((vv) => [vv.variant.name, vv.value])
+  currentVariant.variantValues.map((vv: (typeof currentVariant.variantValues)[number]) => [vv.variant.name, vv.value])
       ),
     });
   };
@@ -150,7 +150,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
       productName: product.name,
       imageUrl: product.images[0]?.url,
       attributes: Object.fromEntries(
-        currentVariant.variantValues.map((vv) => [vv.variant.name, vv.value])
+  currentVariant.variantValues.map((vv: (typeof currentVariant.variantValues)[number]) => [vv.variant.name, vv.value])
       ),
     });
     router.push("/cart");
@@ -175,7 +175,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
             </AspectRatio>
           </div>
           <div className="grid grid-cols-5 sm:grid-cols-4 gap-3">
-            {product.images.map((image) => (
+            {product.images.map((image: (typeof product.images)[number]) => (
               <button
                 key={image.id}
                 onClick={() => setMainImage(image.url)}
@@ -206,7 +206,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
           {product.reviews.length > 0 && (
             <div className="flex items-center gap-2 text-sm">
               <div className="flex items-center gap-0.5">
-                {[...Array(5)].map((_, i) => (
+                {[...Array(5)].map((_: unknown, i: number) => (
                   <Star
                     key={i}
                     className={cn(
@@ -243,7 +243,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
 
           {/* Variant Selectors */}
           <div className="flex flex-col gap-6">
-            {Object.entries(organizedVariants).map(([variantName, values]) => (
+            {Object.entries(organizedVariants).map(([variantName, values]: [string, string[]]) => (
               <div key={variantName} className="flex flex-col gap-3">
                 <Label className="text-base font-medium">
                   {variantName}:{" "}
@@ -258,7 +258,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                   }
                   className="flex flex-wrap gap-2"
                 >
-                  {values.map((value) => (
+                  {values.map((value: string) => (
                     <div key={value}>
                       <RadioGroupItem
                         value={value}
@@ -322,7 +322,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
           <p className="text-muted-foreground">No reviews yet.</p>
         ) : (
           <div className="space-y-6">
-            {product.reviews.map((review) => (
+            {product.reviews.map((review: (typeof product.reviews)[number]) => (
               <div key={review.id} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -345,7 +345,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => (
+                    {[...Array(5)].map((_: unknown, i: number) => (
                       <Star
                         key={i}
                         className={cn(

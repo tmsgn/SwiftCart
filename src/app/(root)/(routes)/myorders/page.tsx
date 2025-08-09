@@ -141,65 +141,70 @@ export default async function MyOrdersPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {order.orderItems.map((it: (typeof order.orderItems)[number]) => {
-                        const pv = it.productVariant;
-                        const product = pv.product;
-                        const imageUrl =
-                          product.images?.[0]?.url ||
-                          "/products/placeholder.svg";
-                        const variantLabel = pv.variantValues
-                          .map((vv: (typeof pv.variantValues)[number]) => `${vv.variant.name}: ${vv.value}`)
-                          .join(", ");
-                        const existingReview = product.reviews?.[0];
-                        const initialRating = existingReview?.rating || 0;
-                        const initialComment = existingReview?.comment || "";
-                        return (
-                          <TableRow key={it.id}>
-                            <TableCell>
-                              <div className="flex items-start gap-3">
-                                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md border bg-muted">
-                                  <Image
-                                    src={imageUrl}
-                                    alt={product.name}
-                                    fill
-                                    className="object-cover"
-                                    sizes="64px"
-                                  />
-                                </div>
-                                <div className="min-w-0">
-                                  <Link
-                                    href={`/${product.id}`}
-                                    className="line-clamp-1 font-medium hover:underline"
-                                  >
-                                    {product.name}
-                                  </Link>
-                                  <div className="text-xs text-muted-foreground">
-                                    Product ID: {product.id}
+                      {order.orderItems.map(
+                        (it: (typeof order.orderItems)[number]) => {
+                          const pv = it.productVariant;
+                          const product = pv.product;
+                          const imageUrl =
+                            product.images?.[0]?.url ||
+                            "/products/placeholder.svg";
+                          const variantLabel = pv.variantValues
+                            .map(
+                              (vv: (typeof pv.variantValues)[number]) =>
+                                `${vv.variant.name}: ${vv.value}`
+                            )
+                            .join(", ");
+                          const existingReview = product.reviews?.[0];
+                          const initialRating = existingReview?.rating || 0;
+                          const initialComment = existingReview?.comment || "";
+                          return (
+                            <TableRow key={it.id}>
+                              <TableCell>
+                                <div className="flex items-start gap-3">
+                                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md border bg-muted">
+                                    <Image
+                                      src={imageUrl}
+                                      alt={product.name}
+                                      fill
+                                      className="object-cover"
+                                      sizes="64px"
+                                    />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <Link
+                                      href={`/${product.id}`}
+                                      className="line-clamp-1 font-medium hover:underline"
+                                    >
+                                      {product.name}
+                                    </Link>
+                                    <div className="text-xs text-muted-foreground">
+                                      Product ID: {product.id}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </TableCell>
-                            <TableCell className="align-top hidden md:table-cell">
-                              {variantLabel || "-"}
-                            </TableCell>
-                            <TableCell className="align-top text-center">
-                              {it.quantity}
-                            </TableCell>
-                            <TableCell className="align-top text-right">
-                              {formatCurrency(it.price)}
-                            </TableCell>
-                            <TableCell className="align-top">
-                              <div className="space-y-2">
-                                <RatingForm
-                                  productId={product.id}
-                                  initialRating={initialRating}
-                                  initialComment={initialComment}
-                                />
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
+                              </TableCell>
+                              <TableCell className="align-top hidden md:table-cell">
+                                {variantLabel || "-"}
+                              </TableCell>
+                              <TableCell className="align-top text-center">
+                                {it.quantity}
+                              </TableCell>
+                              <TableCell className="align-top text-right">
+                                {formatCurrency(it.price)}
+                              </TableCell>
+                              <TableCell className="align-top">
+                                <div className="space-y-2">
+                                  <RatingForm
+                                    productId={product.id}
+                                    initialRating={initialRating}
+                                    initialComment={initialComment}
+                                  />
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        }
+                      )}
                     </TableBody>
                   </Table>
                 </div>
