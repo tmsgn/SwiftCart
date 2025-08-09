@@ -73,7 +73,8 @@ export function useCart() {
 
   const total = useMemo(() => {
     return items.reduce(
-      (sum, it) => sum + Number(it.price || 0) * it.quantity,
+      (sum: number, it: (typeof items)[number]) =>
+        sum + Number(it.price || 0) * it.quantity,
       0
     );
   }, [items]);
@@ -116,8 +117,10 @@ export function useCart() {
   const update = useCallback(
     async (id: string, quantity: number) => {
       const next = items
-        .map((it) => (it.id === id ? { ...it, quantity } : it))
-        .filter((it) => it.quantity > 0);
+        .map((it: (typeof items)[number]) =>
+          it.id === id ? { ...it, quantity } : it
+        )
+        .filter((it: (typeof items)[number]) => it.quantity > 0);
       save(next);
     },
     [items, save]
@@ -125,7 +128,9 @@ export function useCart() {
 
   const remove = useCallback(
     async (id: string) => {
-      const next = items.filter((it) => (it.id === id ? false : true));
+      const next = items.filter((it: (typeof items)[number]) =>
+        it.id === id ? false : true
+      );
       save(next);
     },
     [items, save]

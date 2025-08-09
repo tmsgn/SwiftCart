@@ -57,16 +57,20 @@ export async function placeOrderAction(formData: FormData) {
   }
 
   // Validate single store per order
-  const storeIds = new Set(variants.map((v) => v.product.storeId));
+  const storeIds = new Set(
+    variants.map((v: (typeof variants)[number]) => v.product.storeId)
+  );
   if (storeIds.size !== 1) {
     throw new Error("All items in an order must belong to the same store");
   }
   const storeId = variants[0].product.storeId;
 
   // Build items with server-side price and stock checks
-  const variantById = new Map(variants.map((v) => [v.id, v]));
+  const variantById = new Map(
+    variants.map((v: (typeof variants)[number]) => [v.id, v] as const)
+  );
   let pricePaid = 0;
-  const orderItemsData = items.map((it) => {
+  const orderItemsData = items.map((it: (typeof items)[number]) => {
     const v = variantById.get(it.productVariantId)!;
     const qty = Math.max(1, Math.floor(Number(it.quantity)) || 1);
     pricePaid += v.price * qty;

@@ -36,14 +36,16 @@ export async function createProduct(data: {
           create: data.images,
         },
         variants: {
-          create: data.variants.map((variant) => ({
-            price: variant.price,
-            stock: variant.stock,
-            sku: variant.sku,
-            variantValues: {
-              connect: variant.variantValueIds.map((id) => ({ id })),
-            },
-          })),
+          create: data.variants.map(
+            (variant: (typeof data.variants)[number]) => ({
+              price: variant.price,
+              stock: variant.stock,
+              sku: variant.sku,
+              variantValues: {
+                connect: variant.variantValueIds.map((id: string) => ({ id })),
+              },
+            })
+          ),
         },
       },
     });
@@ -95,7 +97,10 @@ export async function updateProduct(
         await tx.image.deleteMany({ where: { productId } });
         if (data.images.length > 0) {
           await tx.image.createMany({
-            data: data.images.map((img) => ({ url: img.url, productId })),
+            data: data.images.map((img: { url: string }) => ({
+              url: img.url,
+              productId,
+            })),
           });
         }
       }
@@ -110,8 +115,8 @@ export async function updateProduct(
           },
         });
 
-        const byId = new Map(existing.map((v) => [v.id, v]));
-        const bySku = new Map(existing.map((v) => [v.sku, v]));
+        const byId = new Map(existing.map((v) => [v.id, v] as const));
+        const bySku = new Map(existing.map((v) => [v.sku, v] as const));
         const keptIds = new Set<string>();
 
         for (const v of data.variants) {
@@ -149,7 +154,7 @@ export async function updateProduct(
               select: { id: true },
             });
             if (found.length !== vvIds.length) {
-              const foundIds = new Set(found.map((x) => x.id));
+              const foundIds = new Set(found.map((x: { id: string }) => x.id));
               const missing = vvIds.filter((id) => !foundIds.has(id));
               throw new Error(`Invalid variantValueIds: ${missing.join(", ")}`);
             }
@@ -164,7 +169,7 @@ export async function updateProduct(
                 stock,
                 sku: v.sku,
                 variantValues: {
-                  set: vvIds.map((id) => ({ id })),
+                  set: vvIds.map((id: string) => ({ id })),
                 },
               },
             });
@@ -177,7 +182,7 @@ export async function updateProduct(
                 stock,
                 sku: v.sku,
                 variantValues: {
-                  connect: vvIds.map((id) => ({ id })),
+                  connect: vvIds.map((id: string) => ({ id })),
                 },
               },
             });

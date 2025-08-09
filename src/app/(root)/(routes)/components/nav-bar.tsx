@@ -8,7 +8,10 @@ import { useCart } from "@/hooks/use-cart";
 export const Nav = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { items } = useCart();
-  const count = items.reduce((a, b) => a + b.quantity, 0);
+  const count = items.reduce(
+    (a: number, b: (typeof items)[number]) => a + b.quantity,
+    0
+  );
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -28,7 +31,7 @@ export const Nav = () => {
             </Link>
           </div>
           <div className="hidden md:flex md:items-center md:space-x-8">
-            {navLinks.map((link) => (
+            {navLinks.map((link: { href: string; label: string }) => (
               <Link
                 key={link.label}
                 href={link.href}
@@ -116,7 +119,7 @@ export const Nav = () => {
           className="md:hidden bg-white border-t border-gray-200"
         >
           <div className="px-2 pt-2 pb-4 space-y-2 sm:px-3">
-            {navLinks.map((link) => (
+            {navLinks.map((link: { href: string; label: string }) => (
               <Link
                 key={link.label}
                 href={link.href}

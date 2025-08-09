@@ -22,15 +22,22 @@ export const generateSKU = (
   variantValues: string[]
 ): string => {
   const getCode = (str: string, len: number = 3) =>
-    str.replace(/[^a-zA-Z0-9]/g, "").substring(0, len).toUpperCase();
+    str
+      .replace(/[^a-zA-Z0-9]/g, "")
+      .substring(0, len)
+      .toUpperCase();
 
   const nameCode = getCode(name);
   const categoryCode = getCode(category);
   const brandCode = getCode(brand);
 
-  const variantCodes = variantValues.map((val) => getCode(val)).join("-");
+  const variantCodes = variantValues
+    .map((val: string) => getCode(val))
+    .join("-");
 
-  const skuParts = [nameCode, categoryCode, brandCode, variantCodes].filter(Boolean);
-  
+  const skuParts = [nameCode, categoryCode, brandCode, variantCodes].filter(
+    Boolean
+  );
+
   return skuParts.join("-");
 };

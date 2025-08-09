@@ -53,7 +53,7 @@ const StarRating = ({
         {rating.toFixed(1)}
       </span>
       <div className="flex">
-        {[...Array(fullStars)].map((_, i) => (
+        {[...Array(fullStars)].map((_: unknown, i: number) => (
           <Star
             key={`full-${i}`}
             size={16}
@@ -61,7 +61,7 @@ const StarRating = ({
           />
         ))}
         {/* Removed half-star logic for cleaner look like in image */}
-        {[...Array(emptyStars)].map((_, i) => (
+        {[...Array(emptyStars)].map((_: unknown, i: number) => (
           <Star
             key={`empty-${i}`}
             size={16}

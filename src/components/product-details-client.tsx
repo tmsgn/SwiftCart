@@ -27,7 +27,7 @@ export function ProductDetailsClient({
 
   // Get all possible values for each option
   const allOptionValues: Record<string, string[]> = {};
-  options.forEach((opt) => {
+  options.forEach((opt: string) => {
     allOptionValues[opt] = Array.from(
       new Set(
         product.variants
@@ -45,7 +45,7 @@ export function ProductDetailsClient({
   // State for selected values (all empty initially)
   const [selected, setSelected] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
-    options.forEach((opt) => {
+    options.forEach((opt: string) => {
       initial[opt] = "";
     });
     return initial;
@@ -99,7 +99,7 @@ export function ProductDetailsClient({
           {/* Variant Selectors as shadcn dropdowns */}
           {options.length > 0 && (
             <div className="space-y-4 mb-6">
-              {options.map((opt) => (
+              {options.map((opt: string) => (
                 <div key={opt} className="flex items-center gap-3">
                   <span className="font-medium text-sm min-w-[80px]">
                     {opt}:
@@ -112,7 +112,7 @@ export function ProductDetailsClient({
                       <SelectValue placeholder={`Select ${opt}`} />
                     </SelectTrigger>
                     <SelectContent>
-                      {allOptionValues[opt].map((val) => (
+                      {allOptionValues[opt].map((val: string) => (
                         <SelectItem key={val} value={val}>
                           {val}
                         </SelectItem>

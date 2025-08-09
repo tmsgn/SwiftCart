@@ -35,7 +35,7 @@ function Rating({
 }) {
   return (
     <div className="flex space-x-1">
-      {Array.from({ length: max }).map((_, i) => {
+      {Array.from({ length: max }).map((_: unknown, i: number) => {
         const filled = i < value;
         return (
           <Star
