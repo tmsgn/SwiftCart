@@ -1,6 +1,7 @@
 "use server";
 
 import prismadb from "@/lib/prismadb";
+import type { Prisma } from "@prisma/client";
 
 export async function createProduct(data: {
   name: string;
@@ -75,7 +76,7 @@ export async function updateProduct(
   }
 ) {
   try {
-    return await prismadb.$transaction(async (tx) => {
+    return await prismadb.$transaction(async (tx: Prisma.TransactionClient) => {
       // Update only provided product fields
       await tx.product.update({
         where: { id: productId },
