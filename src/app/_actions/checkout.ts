@@ -3,7 +3,6 @@
 import prismadb from "@/lib/prismadb";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import type { Prisma } from "@prisma/client";
 
 export async function placeOrderAction(formData: FormData) {
   const { userId } = await auth();
@@ -48,17 +47,10 @@ export async function placeOrderAction(formData: FormData) {
 
   // Fetch variants and related products
   const variantIds = items.map((i) => i.productVariantId);
-  type VariantWithProduct =
-    import("@prisma/client").Prisma.ProductVariantGetPayload<{
-      include: { product: true };
-    }>;
-
-  const variants: VariantWithProduct[] = await prismadb.productVariant.findMany(
-    {
-      where: { id: { in: variantIds } },
-      include: { product: true },
-    }
-  );
+  const variants = await prismadb.productVariant.findMany({
+    where: { id: { in: variantIds } },
+    include: { product: true },
+  });
 
   if (variants.length !== variantIds.length) {
     throw new Error("Some items no longer exist");
@@ -74,7 +66,7 @@ export async function placeOrderAction(formData: FormData) {
   const storeId = variants[0].product.storeId;
 
   // Build items with server-side price and stock checks
-  const variantById = new Map<string, VariantWithProduct>(
+  const variantById = new Map<string, (typeof variants)[number]>(
     variants.map((v) => [v.id, v] as const)
   );
   let pricePaid = 0;
