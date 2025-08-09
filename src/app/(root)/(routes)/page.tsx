@@ -21,7 +21,7 @@ const RootPage = async () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5 p-8">
-      {products.map((product) => (
+      {products.map((product: (typeof products)[number]) => (
         <ProductCard key={product.id} product={product} />
       ))}
     </div>
