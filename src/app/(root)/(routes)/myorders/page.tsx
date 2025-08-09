@@ -141,14 +141,14 @@ export default async function MyOrdersPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {order.orderItems.map((it) => {
+                      {order.orderItems.map((it: (typeof order.orderItems)[number]) => {
                         const pv = it.productVariant;
                         const product = pv.product;
                         const imageUrl =
                           product.images?.[0]?.url ||
                           "/products/placeholder.svg";
                         const variantLabel = pv.variantValues
-                          .map((vv) => `${vv.variant.name}: ${vv.value}`)
+                          .map((vv: (typeof pv.variantValues)[number]) => `${vv.variant.name}: ${vv.value}`)
                           .join(", ");
                         const existingReview = product.reviews?.[0];
                         const initialRating = existingReview?.rating || 0;
