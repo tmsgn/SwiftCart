@@ -9,7 +9,9 @@ export async function placeOrderAction(formData: FormData) {
   if (!userId) throw new Error("Unauthorized");
 
   const user = await currentUser();
-  const email = user?.emailAddresses?.[0]?.emailAddress || "";
+  // Ensure a unique, non-empty email to satisfy the DB unique constraint even if Clerk lacks an email
+  const email =
+    user?.emailAddresses?.[0]?.emailAddress || `${userId}@users.noreply.local`;
   const name =
     user?.fullName || user?.firstName || user?.username || email || "Customer";
 
@@ -120,17 +122,18 @@ export async function placeOrderAction(formData: FormData) {
 
   // Create order and decrement stock in a transaction
   const order = await prismadb.$transaction(async (tx) => {
-    // Optionally validate stock
+    // Atomically decrement stock with a conditional check to avoid race conditions
     for (const it of orderItemsData) {
-      const v = await tx.productVariant.findUnique({
-        where: { id: it.productVariantId },
+      const updated = await tx.productVariant.updateMany({
+        where: { id: it.productVariantId, stock: { gte: it.quantity } },
+        data: { stock: { decrement: it.quantity } },
       });
-      if (!v) throw new Error("Variant not found during checkout");
-      if (v.stock < it.quantity)
+      if (updated.count === 0) {
         throw new Error("Insufficient stock for an item");
+      }
     }
 
-    // Create order
+    // Create order after all stock operations succeed
     const created = await tx.order.create({
       data: {
         buyerId: userId,
@@ -146,14 +149,6 @@ export async function placeOrderAction(formData: FormData) {
       },
       include: { orderItems: true },
     });
-
-    // Decrement stock
-    for (const it of orderItemsData) {
-      await tx.productVariant.update({
-        where: { id: it.productVariantId },
-        data: { stock: { decrement: it.quantity } },
-      });
-    }
 
     return created;
   });
