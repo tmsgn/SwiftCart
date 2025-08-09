@@ -1,11 +1,23 @@
-import { PrismaClient } from "../../generated/prisma";
-
+// Prefer generated client output; fallback to default @prisma/client for safety
+// This helps avoid runtime failures if the custom output is not present in some environments.
+import type { PrismaClient as PrismaClientType } from "@prisma/client";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { PrismaClient } = (() => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require("../../generated/prisma");
+  } catch {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require("@prisma/client");
+  }
+})();
 
 declare global {
-  var prisma: PrismaClient | undefined;
+  // eslint-disable-next-line no-var
+  var prisma: PrismaClientType | undefined;
 }
 
-let prismadb: PrismaClient;
+let prismadb: PrismaClientType;
 
 if (process.env.NODE_ENV === "production") {
   prismadb = new PrismaClient();
@@ -13,7 +25,7 @@ if (process.env.NODE_ENV === "production") {
   if (!global.prisma) {
     global.prisma = new PrismaClient();
   }
-  prismadb = global.prisma;
+  prismadb = global.prisma!;
 }
 
 export default prismadb;
