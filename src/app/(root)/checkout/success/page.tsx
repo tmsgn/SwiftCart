@@ -18,7 +18,7 @@ export default async function Page({
 }) {
   const orderId = searchParams.orderId;
 
-  let products: Array<{ id: string; name: string }> = [];
+  const products: Array<{ id: string; name: string }> = [];
   if (orderId) {
     const order = await prismadb.order.findUnique({
       where: { id: orderId },

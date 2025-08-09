@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -69,7 +69,7 @@ export default function LocationSelector({
     if (defaultState) setSelectedRegion(defaultState);
     if (defaultCity) setSelectedCity(defaultCity);
     if (defaultPostalCode) setPostalCode(defaultPostalCode);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [defaultCountry, defaultState, defaultCity, defaultPostalCode, value]);
 
   // Controlled value support

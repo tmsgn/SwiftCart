@@ -1,4 +1,5 @@
 import { Nav } from "./(routes)/components/nav-bar";
+import Footer from "./(routes)/components/footer";
 
 export default async function CustomerLayout({
   children,
@@ -6,9 +7,10 @@ export default async function CustomerLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div >
+    <div className="min-h-screen flex flex-col">
       <Nav />
-      {children}
+      <main className="flex-1">{children}</main>
+      <Footer />
     </div>
   );
 }

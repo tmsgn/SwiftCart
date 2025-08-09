@@ -14,7 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, PenSquare, PenSquareIcon, Trash2 } from "lucide-react";
+import { MoreHorizontal, Trash2 } from "lucide-react";
 import { AlertModal } from "@/components/alert-modal";
 import Link from "next/link";
 

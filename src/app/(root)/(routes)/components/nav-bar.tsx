@@ -14,7 +14,7 @@ export const Nav = () => {
     { href: "/", label: "Home" },
     { href: "/shop", label: "Shop" },
     { href: "/about", label: "About Us" },
-    { href: "/contact", label: "Contact" },
+    { href: "/myorders", label: "My Orders" },
   ];
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">

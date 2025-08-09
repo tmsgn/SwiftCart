@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
@@ -55,14 +55,16 @@ function Rating({
 export default function RatingForm({
   productId,
   initialRating = 0,
+  initialComment = "",
 }: {
   productId: string;
   initialRating?: number;
+  initialComment?: string;
 }) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { rating: initialRating, comment: "" },
+    defaultValues: { rating: initialRating, comment: initialComment || "" },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {

@@ -4,13 +4,20 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log(`Clearing previous catalog data...`);
+  // Delete in child->parent order to satisfy FKs
+  await prisma.orderItem.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.review.deleteMany();
+  await prisma.billboard.deleteMany();
+  await prisma.image.deleteMany();
+  await prisma.productVariant.deleteMany();
+  await prisma.product.deleteMany();
   await prisma.category.deleteMany();
   await prisma.variantValue.deleteMany();
   await prisma.variant.deleteMany();
-
-  // Clear buyers and stores for a clean slate
-  await prisma.store.deleteMany();
+  await prisma.address.deleteMany();
   await prisma.buyer.deleteMany();
+  await prisma.store.deleteMany();
 
   console.log(`Start seeding catalog data...`);
 
