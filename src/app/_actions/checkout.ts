@@ -3,7 +3,7 @@
 import prismadb from "@/lib/prismadb";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { Prisma } from "../../../generated/prisma";
+import type { Prisma } from "@prisma/client";
 
 export async function placeOrderAction(formData: FormData) {
   const { userId } = await auth();
@@ -48,9 +48,10 @@ export async function placeOrderAction(formData: FormData) {
 
   // Fetch variants and related products
   const variantIds = items.map((i) => i.productVariantId);
-  type VariantWithProduct = Prisma.ProductVariantGetPayload<{
-    include: { product: true };
-  }>;
+  type VariantWithProduct =
+    import("@prisma/client").Prisma.ProductVariantGetPayload<{
+      include: { product: true };
+    }>;
 
   const variants: VariantWithProduct[] = await prismadb.productVariant.findMany(
     {
