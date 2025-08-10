@@ -108,23 +108,21 @@ export async function updateProduct(
 
       // Variants: upsert by id or SKU and keep referenced ones
       if (Array.isArray(data.variants)) {
-        type ExistingVariant = Prisma.ProductVariantGetPayload<{
-          include: {
-            variantValues: { select: { id: true } };
-            orderItems: { select: { id: true } };
-          };
-        }>;
-
-        const existing: ExistingVariant[] = await tx.productVariant.findMany({
+        const existing = await tx.productVariant.findMany({
           where: { productId },
           include: {
             variantValues: { select: { id: true } },
             orderItems: { select: { id: true } },
           },
         });
+        type ExistingVariant = (typeof existing)[number];
 
-        const byId = new Map(existing.map((v: ExistingVariant) => [v.id, v] as const));
-        const bySku = new Map(existing.map((v: ExistingVariant) => [v.sku, v] as const));
+        const byId = new Map(
+          existing.map((v: ExistingVariant) => [v.id, v] as const)
+        );
+        const bySku = new Map(
+          existing.map((v: ExistingVariant) => [v.sku, v] as const)
+        );
         const keptIds = new Set<string>();
 
         type IncomingVariant = {
