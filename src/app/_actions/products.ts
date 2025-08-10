@@ -174,7 +174,8 @@ export async function updateProduct(
             }
           }
 
-          const target = (v.id && byId.get(v.id)) || bySku.get(v.sku);
+          const target: ExistingVariant | undefined =
+            (v.id ? byId.get(v.id) : undefined) ?? bySku.get(v.sku);
           if (target) {
             await tx.productVariant.update({
               where: { id: target.id },
