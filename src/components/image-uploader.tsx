@@ -45,7 +45,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       } else {
         throw new Error("Upload failed");
       }
-    } catch (error) {
+    } catch {
       toast.error("Something went wrong during upload.");
     } finally {
       setLoading(false);
