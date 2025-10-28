@@ -79,7 +79,7 @@ export default function LocationSelector({
     setSelectedRegion(value.state || "");
     setSelectedCity(value.city || "");
     setPostalCode(value.postalCode || "");
-  }, [value?.country, value?.state, value?.city, value?.postalCode]);
+  }, [value]);
 
   // Load regions when country changes
   useEffect(() => {

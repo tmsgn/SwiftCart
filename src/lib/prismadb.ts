@@ -1,7 +1,6 @@
 // Prefer generated client output; fallback to default @prisma/client for safety
 // This helps avoid runtime failures if the custom output is not present in some environments.
 import type { PrismaClient as PrismaClientType } from "@prisma/client";
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { PrismaClient } = (() => {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -13,7 +12,6 @@ const { PrismaClient } = (() => {
 })();
 
 declare global {
-  // eslint-disable-next-line no-var
   var prisma: PrismaClientType | undefined;
 }
 

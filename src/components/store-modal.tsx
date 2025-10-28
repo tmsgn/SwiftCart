@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,7 +11,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { createStoreAction } from "@/app/_actions/store";
 
@@ -28,10 +26,8 @@ export function StoreModal({
   const [storeData, setStoreData] = useState({
     name: initialData?.name || "",
   });
-  const { user } = useUser();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const router = useRouter();
+  const [error] = useState("");
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

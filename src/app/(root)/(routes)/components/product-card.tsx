@@ -3,6 +3,7 @@ import React, { useState, useMemo } from "react";
 import { Heart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button"; // Assuming shadcn/ui setup
 import { cn } from "@/lib/utils"; // Assuming shadcn/ui setup
+import Image from "next/image";
 import Link from "next/link";
 
 // --- TYPES (Unchanged) ---
@@ -75,15 +76,19 @@ const StarRating = ({
 
 // --- UPDATED PRODUCT CARD ---
 export const ProductCard = ({ product }: { product: Product }) => {
-  // FIX: Add a guard clause to handle cases where the product prop is not provided.
-  // This prevents the "Cannot read properties of undefined" error.
-  if (!product) {
-    return null; // Or return a loading skeleton component
-  }
-
   const [isFavorite, setIsFavorite] = useState(false);
 
   const { averageRating, reviewCount, displayPrice } = useMemo(() => {
+    if (!product) {
+      return {
+        averageRating: 0,
+        reviewCount: 0,
+        displayPrice: new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+        }).format(0),
+      };
+    }
     const totalReviews = product.reviews.length;
     const avg =
       totalReviews > 0
@@ -101,7 +106,13 @@ export const ProductCard = ({ product }: { product: Product }) => {
         currency: "USD",
       }).format(price),
     };
-  }, [product.reviews, product.variants]);
+  }, [product]);
+
+  // FIX: Add a guard clause to handle cases where the product prop is not provided.
+  // This prevents the "Cannot read properties of undefined" error.
+  if (!product) {
+    return null; // Or return a loading skeleton component
+  }
 
   const primaryImage =
     product.images[0]?.url ||
@@ -110,9 +121,11 @@ export const ProductCard = ({ product }: { product: Product }) => {
   return (
     <div className="font-sans group">
       <div className="relative  dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 rounded-lg flex items-center justify-center p-4 aspect-square overflow-hidden">
-        <img
+        <Image
           src={primaryImage}
           alt={`Image of ${product.name}`}
+          width={400}
+          height={400}
           className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
           onError={(e) => {
             e.currentTarget.src =

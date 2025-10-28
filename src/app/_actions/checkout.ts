@@ -37,7 +37,7 @@ export async function placeOrderAction(formData: FormData) {
   let items: Array<{ productVariantId: string; quantity: number }> = [];
   try {
     items = JSON.parse(itemsRaw);
-  } catch (e) {
+  } catch {
     throw new Error("Invalid items payload");
   }
 

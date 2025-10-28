@@ -1,5 +1,6 @@
 import "@/app/globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
+import { neNP } from "@clerk/localizations";
 import { Poppins } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -16,8 +17,8 @@ export default function Layout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <ClerkProvider>
+    <html lang="ne">
+      <ClerkProvider localization={neNP}>
         <body className={poppins.className}>
           <Toaster richColors position="top-right" />
           {children}
