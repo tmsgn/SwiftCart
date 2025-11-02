@@ -2,6 +2,12 @@ import "@/app/globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Poppins } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "SwiftCart",
+  description: "The best place to buy your favorite products.",
+};
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +26,7 @@ export default function Layout({
       <ClerkProvider>
         <body className={poppins.className}>
           <Toaster richColors position="top-right" />
-          {children}
+          <main>{children}</main>
         </body>
       </ClerkProvider>
     </html>
